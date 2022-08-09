@@ -1,0 +1,43 @@
+### Pass variables between job steps in Azure DevOps YAML Pipelines
+
+
+
+```
+sample-azure-pipeline.yml
+trigger: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+- pwsh: |
+    Write-Host "Step 1"
+    $FOO = "some value"
+    $BAR = "some value"
+    $IsFooEqualToBar = ($FOO -eq $BAR)
+    Write-Host "FOO: $FOO"
+    Write-Host "BAR: $BAR"
+    Write-Host "IsFooBar: $IsFooBar"
+    Write-Host "##vso[task.setvariable variable=IsFooBar]$IsFooEqualToBar"
+  displayName: 'Step 1 - Set Variables'
+
+- pwsh: |
+    Write-Host "Step 2"
+    Write-Host "IsFooBar from step variable: $(IsFooBar)"
+    Write-Host "IsFooBar from environment variable: $env:IsFooBar"
+  displayName: 'Step 2 - Log Variable Value'
+
+- pwsh: |
+    Write-Host "Step 3"
+    Write-Host "IsFooBar from step variable: $(IsFooBar)"
+  displayName: 'Step 3 - Conditional (IsFooBar is true) log variable value'
+  condition: eq(variables.IsFooBar, true)
+
+- pwsh: |
+    Write-Host "Step 4"
+    Write-Host "IsFooBar from variable: $(IsFooBar)"
+  displayName: 'Step 4 - Conditional (IsFooBar is NOT true) log variable value'
+  condition: ne(variables.IsFooBar, true)
+  
+  ```
